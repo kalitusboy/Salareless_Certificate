@@ -1,0 +1,32 @@
+name: Build Windows App
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Setup .NET SDK
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '8.0.x'
+
+    # التعديل هنا: أضفنا مسار ملف المشروع مباشرة لحل مشكلة الـ MSBUILD
+    - name: Restore dependencies
+      run: dotnet restore src/CertificateApp.csproj
+
+    # التعديل هنا: تحديد مسار ملف المشروع بدقة أثناء النشر والتجميع
+    - name: Publish Executable
+      run: dotnet publish src/CertificateApp.csproj -c Release -r win-x64 --self-contained true /p:PublishSingleFile=true
+
+    - name: Upload Finished App
+      uses: actions/upload-artifact@v4
+      with:
+        name: CertificateManager-Windows
+        path: src/bin/Release/net8.0-windows/win-x64/publish/
