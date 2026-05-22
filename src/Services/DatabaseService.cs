@@ -26,7 +26,7 @@ namespace CertificateApp.Services
             using var command1 = new SqliteCommand(createTableQuery, connection);
             command1.ExecuteNonQuery();
 
-            // 2. جدول حفظ إعدادات المؤسسة/البلدية (اقتراحك الذكي)
+            // 2. جدول حفظ إعدادات مراجع جهة الإصدار
             var createSettingsTable = @"
                 CREATE TABLE IF NOT EXISTS Settings (
                     Id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -42,7 +42,6 @@ namespace CertificateApp.Services
             using var connection = new SqliteConnection(ConnectionString);
             connection.Open();
 
-            // مسح الإعدادات القديمة أولاً للحفاظ على سطر واحد فقط للإعدادات الحالية
             var deleteQuery = "DELETE FROM Settings;";
             using (var delCmd = new SqliteCommand(deleteQuery, connection)) delCmd.ExecuteNonQuery();
 
@@ -72,9 +71,10 @@ namespace CertificateApp.Services
                     reader.IsDBNull(2) ? "" : reader.GetString(2)
                 );
             }
-            return new Tuple<string, string, string>("", "", ""); // قيم افتراضية فارغة
+            return new Tuple<string, string, string>("", "", "");
         }
 
+        // دالة حفظ شهادة جديدة في قاعدة البيانات (تم تصحيح الحقول هنا لـ .NET 8)
         public static void SaveCertificate(CertificateRecord record)
         {
             using var connection = new SqliteConnection(ConnectionString);
@@ -93,18 +93,20 @@ namespace CertificateApp.Services
 
             using var command = new SqliteCommand(insertQuery, connection);
             command.Parameters.AddWithValue("@W1Name", record.Witness1Name);
-            command.Parameters.AddWithValue("@W1Birth", record.Witness1BirthPlaceDate);
+            command.Parameters.AddWithValue("@W1Birth", record.Witness1Birth); 
             command.Parameters.AddWithValue("@W1Address", record.Witness1Address);
-            command.Parameters.AddWithValue("@W1Card", record.Witness1CardId);
+            command.Parameters.AddWithValue("@W1Card", record.Witness1Card); 
             command.Parameters.AddWithValue("@W1CardDate", record.Witness1CardDate);
+            
             command.Parameters.AddWithValue("@W2Name", record.Witness2Name);
-            command.Parameters.AddWithValue("@W2Birth", record.Witness2BirthPlaceDate);
+            command.Parameters.AddWithValue("@W2Birth", record.Witness2Birth); 
             command.Parameters.AddWithValue("@W2Address", record.Witness2Address);
-            command.Parameters.AddWithValue("@W2Card", record.Witness2CardId);
+            command.Parameters.AddWithValue("@W2Card", record.Witness2Card); 
             command.Parameters.AddWithValue("@W2CardDate", record.Witness2CardDate);
+
             command.Parameters.AddWithValue("@TName", record.TargetName);
-            command.Parameters.AddWithValue("@TBirth", record.TargetBirthPlaceDate);
-            command.Parameters.AddWithValue("@TCard", record.TargetCardId);
+            command.Parameters.AddWithValue("@TBirth", record.TargetBirth); 
+            command.Parameters.AddWithValue("@TCard", record.TargetCard); 
             command.Parameters.AddWithValue("@TCardDate", record.TargetCardDate);
             command.Parameters.AddWithValue("@Latin", record.LatinName);
             command.Parameters.AddWithValue("@IDate", record.IssueDate);
@@ -112,6 +114,7 @@ namespace CertificateApp.Services
             command.ExecuteNonQuery();
         }
 
+        // دالة البحث في السجلات
         public static List<CertificateRecord> SearchCertificates(string keyword)
         {
             var list = new List<CertificateRecord>();
@@ -128,11 +131,22 @@ namespace CertificateApp.Services
                 list.Add(new CertificateRecord
                 {
                     Id = reader.GetInt32(0),
-                    TargetName = reader.GetString(11),
-                    TargetBirth = reader.GetString(12),
-                    TargetCard = reader.GetString(13),
-                    TargetCardDate = reader.GetString(14),
-                    LatinName = reader.GetString(15)
+                    Witness1Name = reader.IsDBNull(1) ? "" : reader.GetString(1),
+                    Witness1Birth = reader.IsDBNull(2) ? "" : reader.GetString(2),
+                    Witness1Address = reader.IsDBNull(3) ? "" : reader.GetString(3),
+                    Witness1Card = reader.IsDBNull(4) ? "" : reader.GetString(4),
+                    Witness1CardDate = reader.IsDBNull(5) ? "" : reader.GetString(5),
+                    Witness2Name = reader.IsDBNull(6) ? "" : reader.GetString(6),
+                    Witness2Birth = reader.IsDBNull(7) ? "" : reader.GetString(7),
+                    Witness2Address = reader.IsDBNull(8) ? "" : reader.GetString(8),
+                    Witness2Card = reader.IsDBNull(9) ? "" : reader.GetString(9),
+                    Witness2CardDate = reader.IsDBNull(10) ? "" : reader.GetString(10),
+                    TargetName = reader.IsDBNull(11) ? "" : reader.GetString(11),
+                    TargetBirth = reader.IsDBNull(12) ? "" : reader.GetString(12),
+                    TargetCard = reader.IsDBNull(13) ? "" : reader.GetString(13),
+                    TargetCardDate = reader.IsDBNull(14) ? "" : reader.GetString(14),
+                    LatinName = reader.IsDBNull(15) ? "" : reader.GetString(15),
+                    IssueDate = reader.IsDBNull(16) ? "" : reader.GetString(16)
                 });
             }
             return list;
