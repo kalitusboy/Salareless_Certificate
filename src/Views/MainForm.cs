@@ -98,9 +98,9 @@ namespace CertificateApp.Views
 
             // أزرار التحكم
             y += 15;
-            btnSave = new Button { Text = "حفظ جديد", Location = new Point(240, y), Width = 100, Height = 40, BackColor = Color.LightGreen, Font = new Font("Sakal Majalla", 12, FontStyle.Bold) };
-            btnUpdate = new Button { Text = "تحديث السجل", Location = new Point(130, y), Width = 100, Height = 40, BackColor = Color.Gold, Font = new Font("Sakal Majalla", 12, FontStyle.Bold) };
-            btnPrintPreview = new Button { Text = "طباعة الشهادة", Location = new Point(20, y), Width = 100, Height = 40, BackColor = Color.LightSkyBlue, Font = new Font("Sakal Majalla", 12, FontStyle.Bold) };
+            btnSave = new Button { Text = "حفظ جديد", Location = new Point(340, y), Width = 110, Height = 40, BackColor = Color.LightGreen, Font = new Font("Sakal Majalla", 12, FontStyle.Bold) };
+            btnUpdate = new Button { Text = "تحديث السجل", Location = new Point(180, y), Width = 110, Height = 40, BackColor = Color.Gold, Font = new Font("Sakal Majalla", 12, FontStyle.Bold) };
+            btnPrintPreview = new Button { Text = "طباعة الشهادة", Location = new Point(20, y), Width = 110, Height = 40, BackColor = Color.LightSkyBlue, Font = new Font("Sakal Majalla", 12, FontStyle.Bold) };
             
             btnSave.Click += BtnSave_Click;
             btnUpdate.Click += BtnUpdate_Click;
@@ -220,7 +220,6 @@ namespace CertificateApp.Views
                 return;
             }
             
-            // تحديث البيانات
             existing.Witness1Name = txtW1Name?.Text ?? "";
             existing.Witness1Birth = txtW1Birth?.Text ?? "";
             existing.Witness1Address = txtW1Address?.Text ?? "";
@@ -327,26 +326,26 @@ namespace CertificateApp.Views
             string lawText = "عن مصالح:\n- لا يمارس أية وظيفة أو عمل يعطيه الحق في المنح العائلية، إثباتا لذلك سلمت هذه الشهادة للإدلاء بها في حدود ما يسمح به القانون.";
             g.DrawString(lawText, regularFont, brush, new RectangleF(60, 635, e.PageBounds.Width - 120, 70), formatRTL);
 
-            // ========== التوقيعات (التعديل النهائي مع الطالب بجانب الشاهدين) ==========
-            float leftX = 60;                           // رئيس المجلس في اليسار
-            float rightX = e.PageBounds.Width - 180;    // الشاهدين في اليمين
-            float studentX = rightX - 100;              // الطالب بجانب الشاهدين (مسافة 100 بكسل ≈ 2.6 سم)
+            // ========== تم إصلاح وتوزيع إحداثيات التوقيعات أفقياً بدقة (RTL المحسوب) ==========
+            float rightX = e.PageBounds.Width - 60;          // الجهة اليمنى (الشهود)
+            float middleX = (e.PageBounds.Width / 2) + 120;  // الجهة الوسطى المتوازنة (الطالب)
+            float leftX = 260;                               // الجهة اليسرى (رئيس المجلس لضمان بقائه داخل حدود الورقة)
 
-            // الجهة اليسرى: رئيس المجلس والتاريخ
-            g.DrawString($"{currentBaladia} في: {computerDateStr}", regularFont, brush, leftX, 720, formatRTL);
-            g.DrawString("رئيس المجلس الشعبي البلدي", headerFont, brush, leftX, 750, formatRTL);
-            g.DrawString("(التوقيع والختم)", regularFont, brush, leftX, 780, formatRTL);
-
-            // الجهة اليمنى: الشاهدان
+            // 1. الجهة اليمنى: الشاهدان
             g.DrawString("إمضاء الشاهدان:", headerFont, brush, rightX, 720, formatRTL);
             g.DrawString("01- ..........................", regularFont, brush, rightX, 750, formatRTL);
             g.DrawString("02- ..........................", regularFont, brush, rightX, 780, formatRTL);
 
-            // الطالب: بجانب الشاهدين (نفس الصفوف الأفقية)
-            g.DrawString("الطالب:", headerFont, brush, studentX, 720, formatRTL);
-            g.DrawString("..........................", regularFont, brush, studentX, 750, formatRTL);
+            // 2. الجهة الوسطى: الطالب (بجانب الشهود متناسق أفقياً وبدون تداخل)
+            g.DrawString("إمضاء الطالب:", headerFont, brush, middleX, 720, formatRTL);
+            g.DrawString("..........................", regularFont, brush, middleX, 750, formatRTL);
 
-            // الاسم اللاتيني
+            // 3. الجهة اليسرى: رئيس المجلس والتاريخ
+            g.DrawString($"{currentBaladia} في: {computerDateStr}", regularFont, brush, leftX, 720, formatRTL);
+            g.DrawString("رئيس المجلس الشعبي البلدي", headerFont, brush, leftX, 750, formatRTL);
+            g.DrawString("(التوقيع والختم)", regularFont, brush, leftX, 780, formatRTL);
+
+            // الاسم اللاتيني أسفل الصفحة
             g.DrawString("الكتابة السابقة للاسم و اللقب بالأحرف اللاتينية:", headerFont, brush, rightMargin, 830, formatRTL);
             g.DrawString(txtLatinName?.Text.ToUpper() ?? "", new Font("Arial", 12, FontStyle.Bold), brush, rightMargin, 860, formatRTL);
         }
