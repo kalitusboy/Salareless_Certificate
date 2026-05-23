@@ -29,5 +29,8 @@ namespace CertificateApp.Models
         
         // تاريخ الإصدار
         public string IssueDate { get; set; } = string.Empty;
+        
+        // آخر تعديل
+        public string LastModified { get; set; } = string.Empty;
     }
 }
